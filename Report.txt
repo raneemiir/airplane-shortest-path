@@ -1,0 +1,179 @@
+Report.txt
+Brian Tomasik
+Dec. 2006
+
+
+MAJOR DATA STRUCTURES
+      My basic data elements were City objects and Flight objects. City
+objects stored information about a particular airport (its name, code,
+difference from GMT time, x coordinate, and y coordinate). They had adjacency
+lists both to other cities and to Flights that departed from them. Cities
+implemented Comparable because they were the objects put into the priority
+queue in Dijkstra's algorithm. Hence, they also stored fields relevant to
+that algorithm, such as costFromStart and prevOnShortestPath.
+      Flight objects stored information about flights: departure time, arrival
+time, flight time, and differences from GMT for the starting and ending Cities.
+The starting City held the Flight object in an adjacency list, so the Flight
+itself only needed to include a field for the destination City.
+       Graph objects store a list of all of the Cities in the form of a
+TreeMap between Strings for the code and City objects. In order to find a code
+if the user only enters a City name, a Graph also stores a map between City
+names and City codes. Graphs do much of the work of carrying out user
+commands: they add new Cities to their list, add new Flights between Cities,
+check whether Cities are already present, and find shortest paths by number of
+Flights and by time. Graphs also provide all of the time-conversion methods
+that are used throughout.
+
+
+TIME AND SPACE ANALYSIS FOR CONSTRUCTING THE GRAPH
+     In the following, I use "n" to stand for the number of Cities in the 
+Graph (what might be called |V|). When I want to write "a constant times n,"
+I write "c*n." This is not meant to imply that the same constant is true in
+all of the cases where I use "c"--just that it's shorter to write "c*n" than
+"a constant times n." Also, when I write methods used in the program, I
+follow their names with () to indicate that they are methods. Many of them
+actually have parameters, but I omit those to avoid cluttering the text.
+
+Space Analysis
+     Ignoring the temporary variables created in the process, construction
+of the Graph did not require that much space. At the end, the Graph consisted
+of n Cities stored in the cityMap TreeMap, as well as n code Strings stored
+in the codeMap TreeMap. In addition, though, each City stored a LinkedList of 
+adjacent Cities and Flights. At worst, each City could have been connected to 
+each other City, in which case the adjacentCities LinkedList would have had n
+elements for each of the n cities. There could have been even more than n
+Flights per City, because there were often several Flights between any given
+pair of Cities.
+     If we count Flights and Cities both as "data elements," and if
+we ignore the other data fields involved (e.g., ints in each data element),
+the Graph required c*n data elements per City (at most n adjacentCities and
+(c-1)*n adjacentFlights). That makes c*n^2 elements total. The n Strings
+in the codeMap are negligible by comparison.
+
+Time Analysis   
+     Constructing the Graph required n calls to addCity() and c*n calls to
+addFlight(). (I'm ignoring here all the work done by findFlight.java in
+reading in the Strings to be entered, etc.)
+     addCity() consisted of calls to 
+     - containsCitybyCode(), which used the containsKey() operation
+       of a TreeMap [O(log n)]
+     - cityMap.put(), which was a put operation on a TreeMap [also O(log n)]
+     - codeMap.put(), another put operation on a TreeMap [also O(log n)].
+Hence the total for this method was c*log n.
+      For addFlight(), I'll ignore the computation involved in converting
+times. Then the main method calls were
+      - startCity.addFlight(), which called the City addFlight() method. This
+        involved just adding the new Flight to a LinkedList, which requires
+	only a constant amount of time.
+      - startCity.alreadyHasEdgeToOtherCity(), which involved looking through
+        the entire LinkedList until the desired element was found [worst
+	case n time]
+      - startCity.addAdjacentcity(), which involved only an addition to
+        a LinkedList [constant amount of time].
+In total, this method required essentially n time.
+      To find the time required for constructing the entire Graph, consider
+that construction involved n calls to addCity() and c*n calls to addFlight().
+The n*c*log n term from the former is swamped by the n*c*n = c*n^2 calls
+of the latter. So the time was O(n^2).
+
+TIME ANALYSIS FOR GRAPH OPERATIONS
+
+Determing if there's a direct flight between cities
+      This method started out with two calls to askUserForCity(). Ignoring
+the costs of printing out messages and other minor operations, that method
+involved calls to containsCityByName() [which is a containsKey() operation
+on a TreeMap, so O(log n)], containsCityByCode() [also O(log n)], and
+getCity() [a get() operation on a TreeMap, so O(log n)]. In total, then, this
+part was c*log n.
+     Next, this operation used checkEdgeBetweenCities(), which called
+alreadyHasEdgeToOtherCity(). As I said above, this requires essentially n time.
+     Finally, this operation called firstCity.printFlightsWithOtherCity(). That
+method involved iterating through the list of Flights of the given city, 
+which took as many steps as there were Flights (i.e., c*n).
+     In total, this method took c*n steps. The c*log n term from the first 
+paragraph is negligible by comparison to the c*n steps from the other
+paragraphs.
+
+List flights originating from a given city
+     This operation called askUserForCity() with cost c*log n, as before.
+     Then the operation called City's printAllFlights() method, which simply
+required iterating through the given City's adjacentFlights list [c*n steps].
+     Overall this method took c*n steps.
+
+List flights going to a given city
+     askUserForCity() took c*log n steps, as usual.
+     printFlightsWithThisDestination() required iterating through all n Cities
+in the Graph. For each City, alreadyHasEdgeToOtherCity() was called [c*n 
+steps], and if there was an edge to the other City, printFlightsWithOtherCity()
+was called. That method, in turn, required iterating through all Flights 
+[c*n steps]. So processing each City took c*n steps, and with n Cities, that
+amounted to c*n^2 steps overall.
+
+Insert a new City into the Graph
+     findFlight.java's addACity() method involved extensive error checking and
+message printing that I'll mostly ignore. I will count, however, calls made
+to containsCityByName() and containsCityByCode(), which took c*log n time,
+as usual.
+     The only other significant cost was from addCity(). In the section on
+time analysis for constructing the Graph, I found that this took c*log n.
+     The total, then, was c*log n.
+
+Add a new Flight to the Graph
+     As usual, askUserForCity() took c*log n steps.
+     askUserForTime() involved only computations, error checking, output
+messages, and manipulation of Strings. Hence, I'll consider it to have taken
+a constant amount of time.
+     Finally, this operation called addFlight(), which I showed before took
+c*n steps.
+    In total, adding a Flight required essentially c*n steps.
+
+Find shortest-time path
+     askUserForCity() took c*log n steps.
+     The rest of this operation involved a call to dijkstra(). That method
+involved several parts. First, it called resetAllCities(), which was O(n)
+because it required iterating through all Cities. Then dijkstra() created
+a PriorityQueue<City> of Cities to be processed. As Weiss notes on p. 494,
+this PriorityQueue could be at most as big as the number of Flights. Previously
+I assumed that there were c*n Flights per City, so with n Cities, that makes
+c*n^2 Flights overall. Hence the height of the PriorityQueue was
+log(c*n^2) or approximately 2log n. Moreover, as Weiss also notes, there 
+might have been as many additions and deletions as there were Flights (i.e.,
+c*n^2 of them). Thus, the total cost of the PriorityQueue operations was
+c*n^2*log n.
+      The overall cost was c*n^2*log n.
+
+Find the path with fewest airports
+     askUserForCity() took c*log n steps. Graph's fewestCities() was an 
+implementation of the unweighted shortest-path algorithm. It's call to 
+resetCities() took c*n steps. Then it created a LinkedList<City> of Cities
+to process. This list had size at most n, so we use at most c*n steps to
+iterate through it. As Weiss notes on p. 489, the bulk of the time is spent
+iterating through the adjacentCities lists. Since I assumed there are c*n^2
+Flights in total, iterating through each one will take c*n^2 steps. Hence,
+the overall time is O(n^2).
+     Unlike the standard shortest unweighted path algorithm, this operation
+does not stop there. Instead, it searches for the shortest-time path given
+the Cities that have to be visited, by calling minimizeTimeGivenPath().
+That method involves constructing a new Graph--but one that contains only
+as many Cities as were on the path found by fewestCities(). Call that
+number of Cities m. Presumably, m << n (often, m will just be 2 or 3).
+      Constructing the new Graph involves m calls to addCity() [each taking
+c*log m steps] and then m iterations of adding the relevant Flights to the
+newly constructed Cities. Assuming that each original City had c*n Flights, 
+the process of adding the relevant Flights to the newly created Cities
+would be repeated c*n times. Each time involves a call to addFlight() and
+(possibly) addAdjacentCity(), both of which are constant in time. Hence,
+adding the relevant Flights to one City took c*n steps, and so doing it 
+for m Cities took c*n*m steps. This swamps the m calls to addCity(), making
+the work for this part O(n*m).
+      Finally, this operation called dijkstra() on the newly created Graph.
+Using the result from above, this took c*m^2*log m steps.
+      Overall, we have c*n^2 from the first paragraph, c*n*m from the second
+paragraph, and c*m^2*log m from the third paragraph. Since m <= n,
+n*m <= n^2, so the c*n*m term can be combined with the c*n^2 term. Therefore,
+we end up with c*n^2 + c*m^2*log m.
+
+
+ACKNOWLEDGEMENTS
+	Many thanks to Jenny Barry '07 for her help with finding debugging
+problems that I was not able to see.
