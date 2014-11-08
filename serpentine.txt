@@ -1,0 +1,67 @@
+#Airport information - USA  for some flights in 1992
+#from http://www.cs.sunysb.edu/~algorith/biblio/testdata/airplane-data
+#Fields:
+# 3 - Airport abbreviation
+# 1 - <padding>
+# 5 - Time Zone (offset from GMT)
+# 1 - <padding>
+# 3 - X coordinate on map
+# 1 - <padding>
+# 3 - Y coordinate on map
+# 1 - <padding>
+# remainder - Name of City/Airport
+#
+# Route information
+# Starts after the '!' delimiter
+#
+# Fields:
+#  3 - Source
+#  1 - <padding>
+#  3 - Destination
+#
+AAA -0800 195 275 a
+BBB -0600 470 280 b
+CCC -0700 430 240 c
+DDD -0600 590 100 d
+EEE -0600 540 180 e
+FFF -0600 540 190 f
+GGG -0800 333 333 g
+HHH -0800 111 111 h
+ZZZ -0800 444 444 z
+!
+ABQ ATL
+ABQ BOS
+ABQ DCA
+
+#Airline Flight Schedule - USA
+#
+#Fields:
+# 2 - Airline
+# 4 - Flight
+# 2 - <padding>
+# 3 - Origin Airport
+# 1 - <padding>
+# 5 - Departure Time
+# 2 - <padding>
+# 3 - Destination Airport
+# 1 - <padding>
+# 5 - Arrival Time
+# 2 - <padding>
+# 2 - Meals (S=snack,L=lunch,D=dinner,B=breakfast,#=depends on class)
+# 4 - <padding>
+# 1 - Stops during flight
+# 4 - <padding>
+# 3 - Aircraft type
+# 12 - <padding>
+# remainder - Booking Classes
+#
+AA 748  AAA  257P  BBB 1047P
+TW 410  BBB  628A  CCC  132P
+DL 660  CCC  125P  DDD  845P
+UA 785  DDD  645A  EEE  1111A 
+YV 221  EEE  820A  FFF 1010A 
+UA 982  EEE  829A  ZZZ  1139P 
+CO1594  FFF  1210P  GGG  222P 
+UA 718  GGG 444P  HHH 666P 
+AS 234	HHH 777P   ZZZ  999P
+
